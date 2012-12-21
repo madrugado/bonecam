@@ -510,6 +510,18 @@ static void init_device(void)
 			errno_exit("VIDIOC_S_FMT");
 
 		/* Note VIDIOC_S_FMT may change width and height. */
+
+		struct v4l2_streamparm* setfps;
+
+		setfps=(struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
+		memset(setfps, 0, sizeof(struct v4l2_streamparm));
+		setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		setfps->parm.capture.timeperframe.numerator=1;
+		setfps->parm.capture.timeperframe.denominator=15;
+
+		if (-1 == xioctl(fd, VIDIOC_S_PARM, setfps))
+			errno_exit("v4l2_set_fps VIDIOC_S_PARM");
+
 	} else {
 		/* Preserve original settings as set by v4l2-ctl for example */
 		if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt))
